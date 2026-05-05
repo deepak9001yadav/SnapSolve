@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 /**
  * QuestionBox — text input + submit button for asking the AI a question
  * about the captured frame.
@@ -15,11 +17,49 @@ export default function QuestionBox({
   isLoading,
   hasImage,
 }) {
+  const [isListening, setIsListening] = useState(false);
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       onSubmit();
     }
+  };
+
+  const startListening = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Your browser does not support Speech Recognition. Try Chrome or Edge.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      onChange(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
   };
 
   const disabled = isLoading || !hasImage;
@@ -46,24 +86,36 @@ export default function QuestionBox({
           rows={2}
         />
 
-        <button
-          className={`btn btn-ask ${isLoading ? "btn-loading" : ""}`}
-          onClick={onSubmit}
-          disabled={disabled || !question.trim()}
-          id="ask-btn"
-        >
-          {isLoading ? (
-            <>
+        <div className="button-group-vertical">
+          <button
+            className={`btn btn-mic ${isListening ? "active" : ""}`}
+            onClick={startListening}
+            disabled={disabled || isListening}
+            title="Voice Input"
+          >
+            {isListening ? (
+              <span className="mic-pulse">🔴</span>
+            ) : (
+              <span className="btn-icon">🎤</span>
+            )}
+          </button>
+
+          <button
+            className={`btn btn-ask ${isLoading ? "btn-loading" : ""}`}
+            onClick={onSubmit}
+            disabled={disabled || !question.trim()}
+            id="ask-btn"
+          >
+            {isLoading ? (
               <span className="spinner" />
-              Analyzing…
-            </>
-          ) : (
-            <>
-              <span className="btn-icon">✨</span>
-              Ask AI
-            </>
-          )}
-        </button>
+            ) : (
+              <>
+                <span className="btn-icon">✨</span>
+                Ask
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {!hasImage && (
