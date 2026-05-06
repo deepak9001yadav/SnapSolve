@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:7800";
 
 /**
  * askAboutImage — sends an image (base64 data URL) + question to the backend
