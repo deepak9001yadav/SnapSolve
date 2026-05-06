@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     openai_model: str = "gpt-4o"          # supports vision (image + text)
     gemini_model: str = "gemini-1.5-flash" # supports vision
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    cors_origins: list[str] = ["http://localhost:5332", "http://127.0.0.1:5332"]
 
     class Config:
         env_file = ".env"
